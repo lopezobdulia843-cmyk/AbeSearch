@@ -1,39 +1,82 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
 import os
 
 app = Flask(__name__)
 
-# This is a full-screen Emulator setup
-EMULATOR_HTML = """
+# This design makes it look like a game console interface
+HTML_LAYOUT = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AbeSearch | Emulator</title>
+    <title>AbeArcade | System OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { background: #000; color: #00ff88; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        #game { width: 100%; height: 80vh; max-width: 800px; border: 2px solid #00ff88; box-shadow: 0 0 20px #00ff88; }
-        .controls { margin-top: 20px; text-align: center; background: #111; padding: 15px; border-radius: 10px; }
-        h1 { margin-top: 0; text-shadow: 0 0 5px #00ff88; }
+        body { background: #000; color: #00ff88; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; }
+        
+        /* The Top Bar (Search) */
+        .top-nav { 
+            background: #111; border-bottom: 2px solid #00ff88; 
+            padding: 10px; display: flex; gap: 10px; align-items: center;
+            position: fixed; top: 0; width: 100%; z-index: 100;
+        }
+        
+        input { 
+            background: #000; border: 1px solid #00ff88; color: #00ff88; 
+            padding: 8px; flex: 1; border-radius: 5px; outline: none;
+        }
+        
+        button { 
+            background: #00ff88; color: #000; border: none; 
+            padding: 8px 15px; font-weight: bold; cursor: pointer; border-radius: 5px;
+        }
+
+        /* The "Game" Window (The Browser) */
+        #web-frame {
+            width: 100%; height: calc(100vh - 60px);
+            margin-top: 60px; border: none; background: white;
+        }
+
+        .welcome-msg {
+            padding: 100px 20px; text-align: center;
+        }
     </style>
 </head>
 <body>
-    <h1>AbeSearch Arcade</h1>
-    <div id="game">
-        <div id="game-container"></div>
-    </div>
-    
-    <div class="controls">
-        <p><b>Controls:</b> Arrows = Move | Z = A | X = B | Enter = Start | Shift = Select</p>
-        <p>Drag and Drop any <b>.nes</b> file into this window to play!</p>
+
+    <div class="top-nav">
+        <span style="font-weight:bold;">ABE_OS v1.0</span>
+        <input type="text" id="urlInput" placeholder="Enter Search or URL (e.g. google.com)">
+        <button onclick="loadSite()">EXECUTE</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/gh/ethanaobrien/emulatorjs@latest/dist/emulator.js"></script>
+    <div id="content-area">
+        <div id="msg" class="welcome-msg">
+            <h1>SYSTEM READY</h1>
+            <p>> Enter a destination to begin emulation...</p>
+            <p style="color: #555;">[ All traffic encrypted via AbeSearch Proxy ]</p>
+        </div>
+        <iframe id="web-frame" style="display:none;"></iframe>
+    </div>
+
     <script>
-        EmuJS.init({
-            container: '#game-container',
-            system: 'nes',
-            # You can add a link to a ROM file here later!
-        });
+        function loadSite() {
+            let url = document.getElementById('urlInput').value;
+            if (!url) return;
+            
+            // If they didn't type http, we add it
+            if (!url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+            
+            const frame = document.getElementById('web-frame');
+            const msg = document.getElementById('msg');
+            
+            // We use a public proxy service to help unblock it since iPad is strict
+            frame.src = "https://www.google.com/search?q=" + encodeURIComponent(url) + "&igu=1";
+            
+            frame.style.display = "block";
+            msg.style.display = "none";
+        }
     </script>
 </body>
 </html>
@@ -41,7 +84,7 @@ EMULATOR_HTML = """
 
 @app.route('/')
 def home():
-    return render_template_string(EMULATOR_HTML)
+    return render_template_string(HTML_LAYOUT)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
