@@ -3,29 +3,29 @@ import os
 
 app = Flask(__name__)
 
-# This loads a professional-grade emulator interface
+# This is a much more stable version for iPad Safari
 EMULATOR_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Abe-Station | Emulator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Abe-Station | OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { margin: 0; background: #000; color: #00ff88; font-family: 'Courier New', monospace; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        #header { padding: 10px; background: #111; border-bottom: 2px solid #00ff88; text-align: center; font-weight: bold; }
-        #emulator-container { flex: 1; width: 100%; position: relative; background: #000; }
-        canvas { width: 100%; height: 100%; cursor: inherit; }
-        .instructions { position: absolute; bottom: 20px; width: 100%; text-align: center; color: #555; pointer-events: none; }
+        body { margin: 0; background: #000; color: #00ff88; font-family: monospace; height: 100vh; display: flex; flex-direction: column; }
+        #header { padding: 15px; background: #111; border-bottom: 2px solid #00ff88; text-align: center; font-size: 1.2rem; }
+        #emu-wrap { flex: 1; position: relative; }
+        #emulator { width: 100%; height: 100%; border: none; }
+        .footer { padding: 10px; font-size: 0.8rem; text-align: center; color: #555; }
     </style>
 </head>
 <body>
-    <div id="header">ABE-STATION v2.0 | SYSTEM READY</div>
+    <div id="header">ABE-STATION v2.5</div>
     
-    <div id="emulator-container">
-        <iframe src="https://neptunajs.com/embed.html" style="width:100%; height:100%; border:none;"></iframe>
+    <div id="emu-wrap">
+        <iframe id="emulator" src="https://emulatorjs.org/embed/nes"></iframe>
     </div>
 
-    <div class="instructions">Tap the 'Load ROM' button inside the emulator to select a game from your iPad</div>
+    <div class="footer">Tap the screen to start | Select a ROM from your iPad</div>
 </body>
 </html>
 """
