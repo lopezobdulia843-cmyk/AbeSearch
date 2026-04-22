@@ -3,7 +3,6 @@ import os
 
 app = Flask(__name__)
 
-# This is a high-performance, touch-ready emulator hub
 HTML_CONTENT = """
 <!DOCTYPE html>
 <html>
@@ -19,7 +18,6 @@ HTML_CONTENT = """
         #console-container { 
             width: 100%; height: 100%; border: none; 
         }
-        /* Stealth Header */
         .status-bar {
             background: #111; color: #00ff88; font-size: 10px;
             padding: 5px 15px; border-bottom: 1px solid #222;
@@ -32,14 +30,15 @@ HTML_CONTENT = """
         <span>SYSTEM_LOAD: OPTIMAL</span>
         <span>ABE-STATION v5.0</span>
     </div>
-    
     <iframe id="console-container" src="https://afterplay.io"></iframe>
-
-    <script>
-        // Forces the iframe to keep focus for touch controls
-        document.getElementById('console-container').onload = function() {
-            this.contentWindow.focus();
-        };
-    </script>
 </body>
 </html>
+"""
+
+@app.route('/')
+def home():
+    return render_template_string(HTML_CONTENT)
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
