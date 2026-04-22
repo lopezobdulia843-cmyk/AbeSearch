@@ -3,37 +3,43 @@ import os
 
 app = Flask(__name__)
 
-# This is a much more stable version for iPad Safari
-EMULATOR_PAGE = """
+# This is a high-performance, touch-ready emulator hub
+HTML_CONTENT = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Abe-Station | OS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABE-STATION OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
-        body { margin: 0; background: #000; color: #00ff88; font-family: monospace; height: 100vh; display: flex; flex-direction: column; }
-        #header { padding: 15px; background: #111; border-bottom: 2px solid #00ff88; text-align: center; font-size: 1.2rem; }
-        #emu-wrap { flex: 1; position: relative; }
-        #emulator { width: 100%; height: 100%; border: none; }
-        .footer { padding: 10px; font-size: 0.8rem; text-align: center; color: #555; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #000; overflow: hidden; font-family: -apple-system, sans-serif;
+        }
+        #console-container { 
+            width: 100%; height: 100%; border: none; 
+        }
+        /* Stealth Header */
+        .status-bar {
+            background: #111; color: #00ff88; font-size: 10px;
+            padding: 5px 15px; border-bottom: 1px solid #222;
+            display: flex; justify-content: space-between;
+        }
     </style>
 </head>
 <body>
-    <div id="header">ABE-STATION v2.5</div>
-    
-    <div id="emu-wrap">
-        <iframe id="emulator" src="https://emulatorjs.org/embed/nes"></iframe>
+    <div class="status-bar">
+        <span>SYSTEM_LOAD: OPTIMAL</span>
+        <span>ABE-STATION v5.0</span>
     </div>
+    
+    <iframe id="console-container" src="https://afterplay.io"></iframe>
 
-    <div class="footer">Tap the screen to start | Select a ROM from your iPad</div>
+    <script>
+        // Forces the iframe to keep focus for touch controls
+        document.getElementById('console-container').onload = function() {
+            this.contentWindow.focus();
+        };
+    </script>
 </body>
 </html>
-"""
-
-@app.route('/')
-def home():
-    return render_template_string(EMULATOR_PAGE)
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
