@@ -1,69 +1,47 @@
-from flask import Flask, request, Response
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from flask import Flask, render_template_string
 import os
 
 app = Flask(__name__)
 
-# --- THE DESIGN ---
-HOME_HTML = """
+# This is a full-screen Emulator setup
+EMULATOR_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AbeSearch</title>
+    <title>AbeSearch | Emulator</title>
     <style>
-        body { background: #121212; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        h1 { font-size: 3rem; margin-bottom: 20px; color: #00ff88; text-shadow: 0 0 10px #00ff88; }
-        .search-box { width: 80%; max-width: 600px; display: flex; gap: 10px; }
-        input { flex: 1; padding: 15px; border-radius: 25px; border: 1px solid #333; background: #1e1e1e; color: white; outline: none; border: 1px solid #00ff88; }
-        button { padding: 15px 25px; border-radius: 25px; border: none; background: #00ff88; color: black; font-weight: bold; cursor: pointer; }
-        p { color: #888; margin-top: 20px; font-size: 0.9rem; }
+        body { background: #000; color: #00ff88; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        #game { width: 100%; height: 80vh; max-width: 800px; border: 2px solid #00ff88; box-shadow: 0 0 20px #00ff88; }
+        .controls { margin-top: 20px; text-align: center; background: #111; padding: 15px; border-radius: 10px; }
+        h1 { margin-top: 0; text-shadow: 0 0 5px #00ff88; }
     </style>
 </head>
 <body>
-    <h1>AbeSearch</h1>
-    <form action="/view" method="get" class="search-box">
-        <input type="text" name="url" placeholder="Enter URL (e.g. https://wikipedia.org)" required>
-        <button type="submit">Go</button>
-    </form>
-    <p>Stealth Mode: Active | Developed by Abe</p>
+    <h1>AbeSearch Arcade</h1>
+    <div id="game">
+        <div id="game-container"></div>
+    </div>
+    
+    <div class="controls">
+        <p><b>Controls:</b> Arrows = Move | Z = A | X = B | Enter = Start | Shift = Select</p>
+        <p>Drag and Drop any <b>.nes</b> file into this window to play!</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/gh/ethanaobrien/emulatorjs@latest/dist/emulator.js"></script>
+    <script>
+        EmuJS.init({
+            container: '#game-container',
+            system: 'nes',
+            # You can add a link to a ROM file here later!
+        });
+    </script>
 </body>
 </html>
 """
 
-# --- THE LOGIC ---
 @app.route('/')
 def home():
-    return HOME_HTML
-
-@app.route('/view')
-def proxy():
-    target_url = request.args.get('url')
-    if not target_url: return "No URL provided", 400
-    if not target_url.startswith('http'): target_url = 'https://' + target_url
-
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        resp = requests.get(target_url, headers=headers, timeout=10)
-        
-        # If it's a webpage, fix the links so they stay in AbeSearch
-        if "text/html" in resp.headers.get("Content-Type", ""):
-            soup = BeautifulSoup(resp.content, 'html.parser')
-            for tag in soup.find_all(['a', 'form', 'link', 'script', 'img']):
-                attr = 'href' if tag.name in ['a', 'link'] else 'src'
-                if tag.name == 'form': attr = 'action'
-                if tag.has_attr(attr):
-                    tag[attr] = f"/view?url={urljoin(target_url, tag[attr])}"
-            content = soup.prettify()
-        else:
-            content = resp.content
-
-        excluded = ['content-encoding', 'content-length', 'transfer-encoding', 'connection', 'x-frame-options', 'content-security-policy']
-        headers = [(n, v) for (n, v) in resp.raw.headers.items() if n.lower() not in excluded]
-        return Response(content, resp.status_code, headers)
-    except Exception as e:
-        return f"Proxy Error: {e}", 500
+    return render_template_string(EMULATOR_HTML)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
